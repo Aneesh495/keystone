@@ -1,0 +1,49 @@
+# Operating System
+.DS_Store
+Thumbs.db
+
+# CommandBox & Lucee runtime artifacts
+.commandbox/
+WEB-INF/
+.cfconfig.json
+server-*.json
+*.log
+logs/
+run/
+tmp/
+storage/journal/
+storage/audit/
+storage/dlq/
+storage/cache/
+
+# Java and bytecode
+*.class
+*.jar
+*.war
+
+# C / Native builds
+native/build/
+native/bin/
+*.o
+*.so
+*.dylib
+*.a
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
