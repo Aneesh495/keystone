@@ -1,0 +1,29 @@
+{
+    "name": "keystone-gateway",
+    "app": {
+        "cfengine": "lucee@5",
+        "webroot": "./",
+        "logDir": "./logs"
+    },
+    "web": {
+        "http": {
+            "enable": true,
+            "port": 8088
+        },
+        "ssl": {
+            "enable": false,
+            "port": 8443
+        },
+        "rewrites": {
+            "enable": true,
+            "config": "web.xml"
+        },
+        "blockCFAdmin": false
+    },
+    "jvm": {
+        "minMemory": 256,
+        "maxMemory": 1024,
+        "args": "-XX:+UseG1GC -Dfile.encoding=UTF-8"
+    },
+    "openBrowser": false
+}

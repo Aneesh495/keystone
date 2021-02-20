@@ -1,0 +1,44 @@
+{
+    "name": "keystone",
+    "version": "1.0.0",
+    "author": "Aneesh <aneeshkrishnaparthasarathy@gmail.com>",
+    "description": "Enterprise Heterogeneous B2B Transaction Mesh, Protocol Gateway, and Semantic EDI/HL7/ISO20022 Integration Hypervisor",
+    "instructions": "Run 'box start' to launch the gateway server or 'box execute tests/runner.cfm' to run tests.",
+    "type": "project",
+    "keywords": [
+        "b2b-gateway",
+        "distributed-transactions",
+        "edi-parser",
+        "hl7-fhir",
+        "saga-orchestrator"
+    ],
+    "homepage": "https://github.com/Aneesh495/keystone",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Aneesh495/keystone.git"
+    },
+    "bugs": "https://github.com/Aneesh495/keystone/issues",
+    "slug": "keystone",
+    "shortDescription": "Enterprise Heterogeneous B2B Transaction Mesh and Protocol Gateway",
+    "license": [
+        {
+            "type": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    ],
+    "dependencies": {},
+    "devDependencies": {},
+    "installPaths": {},
+    "ignore": [
+        "**/.*",
+        "native/**",
+        "clients/**",
+        "storage/**"
+    ],
+    "scripts": {
+        "start": "server start",
+        "stop": "server stop",
+        "test": "execute file=tests/runner.cfm",
+        "bench": "execute file=tests/integration/ConcurrentThroughputTest.cfc"
+    }
+}
