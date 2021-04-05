@@ -116,7 +116,7 @@ component extends="app.parsers.base.ISerializer" {
                     var compSb = createObject("java", "java.lang.StringBuilder").init();
                     for (var cIdx = 1; cIdx <= arrayLen(elem); cIdx++) {
                         if (cIdx > 1) compSb.append(arguments.compSep);
-                        compSb.append(elem[cIdx]);
+                        compSb.append(toString(elem[cIdx]));
                     }
                     sb.append(compSb.toString());
                 } else {
@@ -153,7 +153,9 @@ component extends="app.parsers.base.ISerializer" {
         var sb = createObject("java", "java.lang.StringBuilder").init("ISA");
         for (var i = 1; i <= arrayLen(arguments.elems); i++) {
             sb.append(arguments.elemSep);
-            var val = toString(arguments.elems[i]);
+            var rawVal = arguments.elems[i];
+            var val = isArray(rawVal) ? arrayToList(rawVal, arguments.compSep) : toString(rawVal);
+
             // Apply X12 fixed width rules for ISA elements
             switch (i) {
                 case 1: val = padString(val, 2); break;

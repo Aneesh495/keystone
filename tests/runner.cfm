@@ -10,7 +10,8 @@ suite = new tests.TestSuite();
 
 // List of all registered test runners
 testSuites = [
-    new tests.unit.core.KernelSubsystemsTest()
+    new tests.unit.core.KernelSubsystemsTest(),
+    new tests.unit.parsers.X12ParserTest()
 ];
 
 // Execute each suite
@@ -37,7 +38,6 @@ if (results.failed > 0) {
         }
     }
     writeOutput(chr(10));
-    // Exit with non-zero status in CLI mode if supported
     throw(type="TestSuiteFailedException", message=results.failed & " tests failed.");
 } else {
     writeOutput("[SUCCESS] All test suites passed cleanly with 100% assertion success." & chr(10));
