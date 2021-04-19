@@ -6,9 +6,6 @@ component {
     property name="releaseCharacter" type="string";
     property name="repetitionSeparator" type="string";
     property name="segmentTerminator" type="string";
-    property name="line" type="numeric";
-    property name="column" type="numeric";
-    property name="position" type="numeric";
 
     /**
      * Constructor for EdifactLexer.
@@ -27,9 +24,6 @@ component {
         variables.releaseCharacter = arguments.releaseCharacter;
         variables.repetitionSeparator = arguments.repetitionSeparator;
         variables.segmentTerminator = arguments.segmentTerminator;
-        variables.line = 1;
-        variables.column = 1;
-        variables.position = 1;
         return this;
     }
 
@@ -70,120 +64,157 @@ component {
     }
 
     /**
-     * Tokenizes raw EDIFACT stream, respecting the release escape character '?'.
+     * Splits raw EDIFACT stream into array of raw segment strings, respecting release character escapes.
      */
-    public array function tokenize(required string rawInput) {
-        var tokens = [];
+    public array function splitSegments(required string rawInput) {
+        var delims = detectDelimiters(arguments.rawInput);
         var input = arguments.rawInput;
-        var delims = detectDelimiters(input);
-
-        // If UNA is present, skip past UNA (9 characters)
         var startOffset = delims.hasUna ? (findNoCase("UNA", input) + 9) : 1;
         var inputLen = len(input);
 
-        var currentToken = "";
-        var inSegment = false;
-        var tokenStartCol = 1;
-        var tokenStartLine = 1;
+        var segs = [];
+        var cur = "";
+        var i = startOffset;
 
-        variables.line = 1;
-        variables.column = 1;
-        variables.position = startOffset;
-
-        while (variables.position <= inputLen) {
-            var ch = mid(input, variables.position, 1);
-
-            if (ch == chr(10)) {
-                variables.line++;
-                variables.column = 0;
-            }
-
-            // Check for release escape character
-            if (ch == variables.releaseCharacter && variables.position < inputLen) {
-                var nextCh = mid(input, variables.position + 1, 1);
-                // Append escaped character directly
-                currentToken &= nextCh;
-                variables.position += 2;
-                variables.column += 2;
+        while (i <= inputLen) {
+            var ch = mid(input, i, 1);
+            if (ch == variables.releaseCharacter && i < inputLen) {
+                cur &= ch & mid(input, i + 1, 1);
+                i += 2;
                 continue;
             }
-
             if (ch == variables.segmentTerminator) {
-                if (len(currentToken) > 0 || inSegment) {
-                    arrayAppend(tokens, new app.parsers.base.Token(
-                        type = inSegment ? "ELEMENT" : "SEGMENT_ID",
-                        value = currentToken,
-                        line = tokenStartLine,
-                        column = tokenStartCol,
-                        offset = variables.position - len(currentToken)
-                    ));
-                    currentToken = "";
+                var cleanSeg = trim(cur);
+                if (len(cleanSeg) > 0) {
+                    arrayAppend(segs, cleanSeg);
                 }
-                arrayAppend(tokens, new app.parsers.base.Token(
-                    type = "SEGMENT_END",
-                    value = ch,
-                    line = variables.line,
-                    column = variables.column,
-                    offset = variables.position
-                ));
-                inSegment = false;
-            } else if (ch == variables.elementSeparator) {
-                var tokType = inSegment ? "ELEMENT" : "SEGMENT_ID";
-                arrayAppend(tokens, new app.parsers.base.Token(
-                    type = tokType,
-                    value = currentToken,
-                    line = tokenStartLine,
-                    column = tokenStartCol,
-                    offset = variables.position - len(currentToken)
-                ));
-                currentToken = "";
-                inSegment = true;
-                tokenStartCol = variables.column + 1;
-                tokenStartLine = variables.line;
-            } else if (ch == variables.componentSeparator && inSegment) {
-                arrayAppend(tokens, new app.parsers.base.Token(
-                    type = "COMPONENT",
-                    value = currentToken,
-                    line = tokenStartLine,
-                    column = tokenStartCol,
-                    offset = variables.position - len(currentToken)
-                ));
-                currentToken = "";
-                tokenStartCol = variables.column + 1;
-                tokenStartLine = variables.line;
-            } else {
-                // Ignore whitespace outside of segments
-                if (!inSegment && (ch == chr(13) || ch == chr(10) || ch == " " || ch == chr(9))) {
-                    // skip
-                } else {
-                    if (len(currentToken) == 0) {
-                        tokenStartCol = variables.column;
-                        tokenStartLine = variables.line;
+                cur = "";
+                i++;
+                continue;
+            }
+            cur &= ch;
+            i++;
+        }
+
+        var trailing = trim(cur);
+        if (len(trailing) > 0) {
+            arrayAppend(segs, trailing);
+        }
+
+        return segs;
+    }
+
+    /**
+     * Splits string by delimiter while respecting escape character.
+     */
+    public array function splitTokens(required string text, required string delim) {
+        var list = [];
+        var cur = "";
+        var lenText = len(arguments.text);
+        var i = 1;
+
+        while (i <= lenText) {
+            var ch = mid(arguments.text, i, 1);
+            if (ch == variables.releaseCharacter && i < lenText) {
+                cur &= ch & mid(arguments.text, i + 1, 1);
+                i += 2;
+                continue;
+            }
+            if (ch == arguments.delim) {
+                arrayAppend(list, cur);
+                cur = "";
+                i++;
+                continue;
+            }
+            cur &= ch;
+            i++;
+        }
+        arrayAppend(list, cur);
+        return list;
+    }
+
+    /**
+     * Unescapes release characters from string.
+     */
+    public string function unescape(required string text) {
+        var res = "";
+        var lenText = len(arguments.text);
+        var i = 1;
+
+        while (i <= lenText) {
+            var ch = mid(arguments.text, i, 1);
+            if (ch == variables.releaseCharacter && i < lenText) {
+                res &= mid(arguments.text, i + 1, 1);
+                i += 2;
+                continue;
+            }
+            res &= ch;
+            i++;
+        }
+        return res;
+    }
+
+    /**
+     * Tokenizes raw EDIFACT stream into token list for compatibility.
+     */
+    public array function tokenize(required string rawInput) {
+        var tokens = [];
+        var segments = splitSegments(arguments.rawInput);
+        var lineNum = 1;
+
+        for (var segText in segments) {
+            var rawParts = splitTokens(segText, variables.elementSeparator);
+            var segId = rawParts[1];
+
+            arrayAppend(tokens, new app.parsers.base.Token(
+                type = "SEGMENT_ID",
+                value = segId,
+                line = lineNum,
+                column = 1,
+                offset = 0
+            ));
+
+            for (var p = 2; p <= arrayLen(rawParts); p++) {
+                var elemPart = rawParts[p];
+                var comps = splitTokens(elemPart, variables.componentSeparator);
+
+                if (arrayLen(comps) > 1) {
+                    for (var c in comps) {
+                        arrayAppend(tokens, new app.parsers.base.Token(
+                            type = "COMPONENT",
+                            value = unescape(c),
+                            line = lineNum,
+                            column = 1,
+                            offset = 0
+                        ));
                     }
-                    currentToken &= ch;
+                } else {
+                    arrayAppend(tokens, new app.parsers.base.Token(
+                        type = "ELEMENT",
+                        value = unescape(elemPart),
+                        line = lineNum,
+                        column = 1,
+                        offset = 0
+                    ));
                 }
             }
 
-            variables.position++;
-            variables.column++;
-        }
-
-        if (len(currentToken) > 0) {
             arrayAppend(tokens, new app.parsers.base.Token(
-                type = inSegment ? "ELEMENT" : "SEGMENT_ID",
-                value = currentToken,
-                line = tokenStartLine,
-                column = tokenStartCol,
-                offset = variables.position - len(currentToken)
+                type = "SEGMENT_END",
+                value = variables.segmentTerminator,
+                line = lineNum,
+                column = 1,
+                offset = 0
             ));
+            lineNum++;
         }
 
         arrayAppend(tokens, new app.parsers.base.Token(
             type = "EOF",
             value = "",
-            line = variables.line,
-            column = variables.column,
-            offset = variables.position
+            line = lineNum,
+            column = 1,
+            offset = 0
         ));
 
         return tokens;

@@ -11,7 +11,8 @@ suite = new tests.TestSuite();
 // List of all registered test runners
 testSuites = [
     new tests.unit.core.KernelSubsystemsTest(),
-    new tests.unit.parsers.X12ParserTest()
+    new tests.unit.parsers.X12ParserTest(),
+    new tests.unit.parsers.EdifactParserTest()
 ];
 
 // Execute each suite
