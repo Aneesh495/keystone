@@ -13,7 +13,8 @@ testSuites = [
     new tests.unit.core.KernelSubsystemsTest(),
     new tests.unit.parsers.X12ParserTest(),
     new tests.unit.parsers.EdifactParserTest(),
-    new tests.unit.parsers.HL7ParserTest()
+    new tests.unit.parsers.HL7ParserTest(),
+    new tests.unit.parsers.Iso20022ParserTest()
 ];
 
 // Execute each suite
