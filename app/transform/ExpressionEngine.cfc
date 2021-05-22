@@ -19,25 +19,32 @@ component {
     }
 
     /**
-     * Evaluates an expression against a scoped context struct.
+     * Public alias for expression evaluation.
+     */
+    public any function evaluate(required string expression, struct context = {}) {
+        return eval(arguments.expression, arguments.context);
+    }
+
+    /**
+     * Core evaluation method. Uses 'eval' to avoid shadowing ColdFusion's built-in evaluate() BIF.
      *
      * @expression Expression string, e.g. "item.qty * item.price", "uppercase(customer.name)", "x > 0 ? 'YES' : 'NO'"
      * @context Scope dictionary containing variables
      */
-    public any function evaluate(required string expression, struct context = {}) {
+    public any function eval(required string expression, struct context = {}) {
         var expr = trim(arguments.expression);
         if (len(expr) == 0) return "";
 
         // Check for ternary operator: <condition> ? <trueVal> : <falseVal>
         var ternaryMatch = parseTernary(expr);
         if (!structIsEmpty(ternaryMatch)) {
-            var conditionVal = evaluate(ternaryMatch.condition, arguments.context);
+            var conditionVal = eval(ternaryMatch.condition, arguments.context);
             if (isBoolean(conditionVal) && conditionVal) {
-                return evaluate(ternaryMatch.trueExpr, arguments.context);
+                return eval(ternaryMatch.trueExpr, arguments.context);
             } else if (!isBoolean(conditionVal) && len(toString(conditionVal)) > 0 && conditionVal != 0) {
-                return evaluate(ternaryMatch.trueExpr, arguments.context);
+                return eval(ternaryMatch.trueExpr, arguments.context);
             } else {
-                return evaluate(ternaryMatch.falseExpr, arguments.context);
+                return eval(ternaryMatch.falseExpr, arguments.context);
             }
         }
 
@@ -50,7 +57,7 @@ component {
             var evaluatedArgs = [];
 
             for (var rawArg in rawArgs) {
-                arrayAppend(evaluatedArgs, evaluate(rawArg, arguments.context));
+                arrayAppend(evaluatedArgs, eval(rawArg, arguments.context));
             }
 
             if (structKeyExists(variables.customFunctions, fnName)) {
@@ -70,8 +77,8 @@ component {
         // Check for binary arithmetic: +, -, *, /
         var mathTokens = splitBinaryOperator(expr);
         if (!structIsEmpty(mathTokens)) {
-            var leftVal = evaluate(mathTokens.left, arguments.context);
-            var rightVal = evaluate(mathTokens.right, arguments.context);
+            var leftVal = eval(mathTokens.left, arguments.context);
+            var rightVal = eval(mathTokens.right, arguments.context);
 
             if (mathTokens.op == "+") {
                 if (isNumeric(leftVal) && isNumeric(rightVal)) {

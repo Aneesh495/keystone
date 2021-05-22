@@ -15,7 +15,8 @@ testSuites = [
     new tests.unit.parsers.EdifactParserTest(),
     new tests.unit.parsers.HL7ParserTest(),
     new tests.unit.parsers.Iso20022ParserTest(),
-    new tests.unit.parsers.FlatFileTest()
+    new tests.unit.parsers.FlatFileTest(),
+    new tests.unit.transform.TransformTest()
 ];
 
 // Execute each suite
