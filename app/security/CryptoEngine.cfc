@@ -48,17 +48,14 @@ component {
         var decoder = createObject("java", "java.util.Base64").getDecoder();
         var rawBytes = decoder.decode(arguments.base64Payload);
 
-        if (arrayLen(rawBytes) < 28) {
+        var totalLen = arrayLen(rawBytes);
+        if (totalLen < 28) {
             throw(type="InvalidPayloadException", message="Encrypted payload is shorter than IV + GCM tag header.");
         }
 
-        var bais = createObject("java", "java.io.ByteArrayInputStream").init(rawBytes);
-        var iv = javaCast("byte[]", createObject("java", "java.lang.reflect.Array").newInstance(javaCast("byte", 0).getClass(), 12));
-        bais.read(iv, 0, 12);
-
-        var cipherBytesLen = arrayLen(rawBytes) - 12;
-        var cipherBytes = javaCast("byte[]", createObject("java", "java.lang.reflect.Array").newInstance(javaCast("byte", 0).getClass(), cipherBytesLen));
-        bais.read(cipherBytes, 0, cipherBytesLen);
+        var arrays = createObject("java", "java.util.Arrays");
+        var iv = arrays.copyOfRange(rawBytes, javaCast("int", 0), javaCast("int", 12));
+        var cipherBytes = arrays.copyOfRange(rawBytes, javaCast("int", 12), javaCast("int", totalLen));
 
         var cipher = createObject("java", "javax.crypto.Cipher").getInstance("AES/GCM/NoPadding");
         var gcmSpec = createObject("java", "javax.crypto.spec.GCMParameterSpec").init(128, iv);

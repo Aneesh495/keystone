@@ -13,8 +13,12 @@ run/
 tmp/
 storage/journal/
 storage/audit/
+storage/audit_test*/
 storage/dlq/
 storage/cache/
+storage/locks/
+storage/outbox/
+storage/partners/
 
 # Java and bytecode
 *.class
