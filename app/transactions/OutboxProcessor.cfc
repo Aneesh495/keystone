@@ -183,7 +183,7 @@ component {
                 } else {
                     // Exponential backoff with jitter
                     var backoff = variables.baseDelayMs * (2 ^ (entry.attempts - 1));
-                    var jitter = randRange(50, 250);
+                    var jitter = variables.baseDelayMs > 0 ? randRange(1, max(2, int(variables.baseDelayMs / 2))) : 0;
                     entry.nextAttemptAt = getTickCount() + backoff + jitter;
 
                     lock name="#variables.lockName#_#entry.id#" type="exclusive" timeout="10" {

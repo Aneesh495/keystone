@@ -17,7 +17,8 @@ testSuites = [
     new tests.unit.parsers.Iso20022ParserTest(),
     new tests.unit.parsers.FlatFileTest(),
     new tests.unit.transform.TransformTest(),
-    new tests.unit.security.SecurityTest()
+    new tests.unit.security.SecurityTest(),
+    new tests.unit.transactions.SagaTest()
 ];
 
 // Execute each suite
