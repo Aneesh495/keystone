@@ -112,6 +112,11 @@ component {
         }
     }
 
+    public struct function verifyIntegrity() {
+        var res = verifyChain();
+        return { "valid": res.isValid, "details": res };
+    }
+
     public array function getBlocks(numeric limit = 100) {
         var res = [];
         lock name="keystone_audit_ledger_lock" type="readOnly" timeout="2" {

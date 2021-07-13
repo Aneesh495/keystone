@@ -10,16 +10,31 @@ component {
     property name="globalMiddlewares" type="array";
     property name="notFoundHandler" type="any";
     property name="methodNotAllowedHandler" type="any";
+    property name="kernel" type="any";
+    property name="logger" type="any";
 
     /**
      * Initializes the HttpRouter instance.
      */
-    public any function init() {
+    public any function init(any kernel = "", any logger = "") {
         variables.routes = [];
         variables.globalMiddlewares = [];
         variables.notFoundHandler = "";
         variables.methodNotAllowedHandler = "";
+        variables.kernel = arguments.kernel;
+        variables.logger = arguments.logger;
 
+        return this;
+    }
+
+    /**
+     * Registers default API gateway routes.
+     */
+    public any function registerRoutes() {
+        var api = new app.web.controllers.ApiController(variables.kernel);
+        get("/api/v1/health", function(ctx) { return api.getHealth(ctx); });
+        post("/api/v1/parse", function(ctx) { return api.parseDocument(ctx); });
+        get("/api/v1/metrics", function(ctx) { return api.getMetrics(ctx); });
         return this;
     }
 

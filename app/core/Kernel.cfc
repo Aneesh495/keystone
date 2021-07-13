@@ -204,4 +204,22 @@ component {
     public boolean function isBootstrapped() { return variables.isBootstrapped; }
     public date function getBootstrappedAt() { return variables.bootstrappedAt; }
     public string function getRootDir() { return variables.rootDir; }
+
+    public boolean function hasService(required string name) {
+        return structKeyExists(variables.subsystems, arguments.name);
+    }
+
+    public any function getService(required string name) {
+        if (!structKeyExists(variables.subsystems, arguments.name)) {
+            throw(type="ServiceNotFoundException", message="Service [#arguments.name#] is not registered");
+        }
+        return variables.subsystems[arguments.name];
+    }
+
+    public numeric function getUptimeMs() {
+        if (!variables.isBootstrapped || !isDate(variables.bootstrappedAt)) {
+            return 0;
+        }
+        return dateDiff("s", variables.bootstrappedAt, now()) * 1000;
+    }
 }

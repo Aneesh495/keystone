@@ -98,11 +98,11 @@ component {
         cfheader(statusCode = 500, statusText = "Internal Server Error");
         cfcontent(type = "text/html", reset = true);
         writeOutput("<html><head><title>500 Internal Server Error</title></head>");
-        writeOutput("<body style='font-family: monospace; background: #0f172a; color: #f8fafc; padding: 40px;'>");
-        writeOutput("<h1 style='color: #ef4444;'>Keystone Gateway Error</h1>");
+        writeOutput("<body style='font-family: monospace; background: ##0f172a; color: ##f8fafc; padding: 40px;'>");
+        writeOutput("<h1 style='color: ##ef4444;'>Keystone Gateway Error</h1>");
         writeOutput("<p><strong>Event:</strong> " & htmlEditFormat(arguments.eventName) & "</p>");
         writeOutput("<p><strong>Message:</strong> " & htmlEditFormat(arguments.exception.message) & "</p>");
-        writeOutput("<pre style='background: #1e293b; padding: 20px; border-radius: 6px; overflow-x: auto;'>");
+        writeOutput("<pre style='background: ##1e293b; padding: 20px; border-radius: 6px; overflow-x: auto;'>");
         writeOutput(htmlEditFormat(arguments.exception.stackTrace ?: ""));
         writeOutput("</pre></body></html>");
     }
