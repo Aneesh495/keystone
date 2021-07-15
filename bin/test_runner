@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Keystone Automated Test Orchestrator CLI
+# Executes full test suite with exit code validation and formatted output.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SERVER_PORT=8088
+TEST_URL="http://127.0.0.1:${SERVER_PORT}/tests/runner.cfm"
+
+BOLD="\033[1m"
+RESET="\033[0m"
+GREEN="\033[32m"
+RED="\033[31m"
+CYAN="\033[36m"
+
+# Ensure server is running
+if ! curl -s --connect-timeout 2 "http://127.0.0.1:${SERVER_PORT}/api/v1/health" > /dev/null 2>&1; then
+    echo -e "${CYAN}Keystone server is not running. Starting background server...${RESET}"
+    cd "${PROJECT_ROOT}"
+    box server start
+    sleep 3
+fi
+
+echo -e "${CYAN}${BOLD}Executing Keystone Test Matrix...${RESET}"
+HTTP_OUTPUT=$(curl -s "${TEST_URL}")
+
+echo "${HTTP_OUTPUT}"
+
+if echo "${HTTP_OUTPUT}" | grep -q "\[SUCCESS\]"; then
+    echo -e "${GREEN}${BOLD}>> ALL TEST SUITES PASSED CLEANLY WITH 100% SUCCESS.${RESET}"
+    exit 0
+else
+    echo -e "${RED}${BOLD}>> TEST SUITE REPORTED FAILURES.${RESET}"
+    exit 1
+fi

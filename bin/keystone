@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# Keystone B2B Transaction Mesh - Unified CLI Control Utility
+# Provides local server lifecycle control, protocol parsing, and telemetry inspection.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SERVER_PORT=8088
+SERVER_URL="http://127.0.0.1:${SERVER_PORT}"
+
+# ANSI formatting
+BOLD="\033[1m"
+RESET="\033[0m"
+GREEN="\033[32m"
+RED="\033[31m"
+CYAN="\033[36m"
+YELLOW="\033[33m"
+
+print_header() {
+    echo -e "${CYAN}${BOLD}"
+    echo "================================================================"
+    echo "       KEYSTONE B2B TRANSACTION MESH - COMMAND LINE INTERFACE   "
+    echo "================================================================"
+    echo -e "${RESET}"
+}
+
+usage() {
+    print_header
+    echo "Usage: keystone <command> [options]"
+    echo ""
+    echo "Available Commands:"
+    echo "  start               Start the background CommandBox / Lucee gateway server"
+    echo "  stop                Stop the running gateway server"
+    echo "  restart             Restart the gateway server"
+    echo "  status              Inspect runtime health, JVM stats, and uptime"
+    echo "  test                Execute the automated test suite"
+    echo "  parse <file>        Parse an EDI, HL7, or ISO20022 document from CLI"
+    echo "  metrics             Dump live Prometheus telemetry metrics"
+    echo "  bench               Run native acceleration and throughput benchmarks"
+    echo "  version             Print version and engine identity"
+    echo ""
+    exit 1
+}
+
+cmd_status() {
+    print_header
+    echo -e "Checking gateway status at ${SERVER_URL}..."
+    if curl -s --connect-timeout 2 "${SERVER_URL}/api/v1/health" > /dev/null 2>&1; then
+        echo -e "${GREEN}[STATUS: ONLINE]${RESET}"
+        echo ""
+        curl -s "${SERVER_URL}/api/v1/health" | python3 -m json.tool 2>/dev/null || curl -s "${SERVER_URL}/api/v1/health"
+        echo ""
+    else
+        echo -e "${RED}[STATUS: OFFLINE]${RESET} Server not responding on port ${SERVER_PORT}."
+        exit 1
+    fi
+}
+
+cmd_start() {
+    print_header
+    echo "Starting Keystone Gateway via CommandBox..."
+    cd "${PROJECT_ROOT}"
+    box server start
+}
+
+cmd_stop() {
+    print_header
+    echo "Stopping Keystone Gateway..."
+    cd "${PROJECT_ROOT}"
+    box server stop
+}
+
+cmd_restart() {
+    cmd_stop
+    sleep 1
+    cmd_start
+}
+
+cmd_test() {
+    "${PROJECT_ROOT}/bin/test_runner"
+}
+
+cmd_parse() {
+    if [[ $# -lt 1 ]]; then
+        echo -e "${RED}Error: File path required for parse command.${RESET}"
+        echo "Usage: keystone parse <file> [protocol]"
+        exit 1
+    fi
+
+    local file_path="$1"
+    local protocol="${2:-}"
+
+    if [[ ! -f "$file_path" ]]; then
+        echo -e "${RED}Error: File not found: ${file_path}${RESET}"
+        exit 1
+    fi
+
+    # Auto-detect protocol if not specified
+    if [[ -z "$protocol" ]]; then
+        local first_line
+        first_line="$(head -n 1 "$file_path")"
+        if [[ "$first_line" =~ ^ISA ]]; then
+            protocol="X12"
+        elif [[ "$first_line" =~ ^(UNA|UNB) ]]; then
+            protocol="EDIFACT"
+        elif [[ "$first_line" =~ ^MSH ]]; then
+            protocol="HL7"
+        elif [[ "$first_line" == *"pain.001"* || "$first_line" == *"pacs.008"* ]]; then
+            protocol="ISO20022"
+        else
+            protocol="CSV"
+        fi
+    fi
+
+    echo -e "${CYAN}Parsing file [${file_path}] as [${protocol}]...${RESET}"
+    local content
+    content="$(cat "$file_path")"
+
+    local json_payload
+    json_payload=$(python3 -c '
+import sys, json
+data = {"protocol": sys.argv[1], "content": sys.argv[2]}
+print(json.dumps(data))
+' "$protocol" "$content")
+
+    curl -s -X POST "${SERVER_URL}/api/v1/parse" \
+        -H "Content-Type: application/json" \
+        -d "$json_payload" | python3 -m json.tool
+}
+
+cmd_metrics() {
+    curl -s "${SERVER_URL}/api/v1/metrics"
+}
+
+cmd_bench() {
+    print_header
+    echo "Running native acceleration benchmarks..."
+    if [[ -f "${PROJECT_ROOT}/native/bin/keystone_bench" ]]; then
+        "${PROJECT_ROOT}/native/bin/keystone_bench"
+    else
+        echo "Building native benchmark binary..."
+        cd "${PROJECT_ROOT}/native" && make
+        "${PROJECT_ROOT}/native/bin/keystone_bench"
+    fi
+}
+
+cmd_version() {
+    echo "Keystone B2B Transaction Mesh :: Version 1.0.0"
+    echo "ColdFusion Engine: Lucee 5.4.8 on CommandBox / Undertow"
+    echo "Architecture: High-Throughput Heterogeneous B2B Gateway"
+}
+
+# Main routing
+if [[ $# -eq 0 ]]; then
+    usage
+fi
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+    start)   cmd_start "$@" ;;
+    stop)    cmd_stop "$@" ;;
+    restart) cmd_restart "$@" ;;
+    status)  cmd_status "$@" ;;
+    test)    cmd_test "$@" ;;
+    parse)   cmd_parse "$@" ;;
+    metrics) cmd_metrics "$@" ;;
+    bench)   cmd_bench "$@" ;;
+    version) cmd_version "$@" ;;
+    *)       usage ;;
+esac
