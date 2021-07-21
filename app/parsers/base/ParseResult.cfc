@@ -62,6 +62,7 @@ component {
     }
 
     public struct function getAst() { return variables.ast; }
+    public any function getData() { return variables.ast; }
     public void function setAst(required struct ast) { variables.ast = arguments.ast; }
     public array function getErrors() { return variables.errors; }
     public array function getWarnings() { return variables.warnings; }
