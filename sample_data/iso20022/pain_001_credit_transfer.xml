@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+    <CstmrCdtTrfInitn>
+        <GrpHdr>
+            <MsgId>MSG-PAIN001-20261102-001</MsgId>
+            <CreDtTm>2026-11-02T16:30:00Z</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <CtrlSum>450000.00</CtrlSum>
+            <InitgPty>
+                <Nm>ACME INDUSTRIAL CORP</Nm>
+                <Id>
+                    <OrgId>
+                        <AnyBIC>ACMEUS33XXX</AnyBIC>
+                    </OrgId>
+                </Id>
+            </InitgPty>
+        </GrpHdr>
+        <PmtInf>
+            <PmtInfId>PMT-INFO-BATCH-001</PmtInfId>
+            <PmtMtd>TRF</PmtMtd>
+            <ReqdExctnDt>2026-11-03</ReqdExctnDt>
+            <Dbtr>
+                <Nm>ACME INDUSTRIAL CORP</Nm>
+            </Dbtr>
+            <DbtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>US89ACME1002938475</Id>
+                    </Othr>
+                </Id>
+            </DbtrAcct>
+            <DbtrAgt>
+                <FinInstnId>
+                    <BICFI>JPMCUS33XXX</BICFI>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtTrfTxInf>
+                <PmtId>
+                    <EndToEndId>E2E-PAY-2026-99214</EndToEndId>
+                </PmtId>
+                <Amt>
+                    <InstdAmt Ccy="USD">450000.00</InstdAmt>
+                </Amt>
+                <CdtrAgt>
+                    <FinInstnId>
+                        <BICFI>CITIUS33XXX</BICFI>
+                    </FinInstnId>
+                </CdtrAgt>
+                <Cdtr>
+                    <Nm>GLOBAL LOGISTICS CORP</Nm>
+                </Cdtr>
+                <CdtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>US44CITI9928374615</Id>
+                        </Othr>
+                    </Id>
+                </CdtrAcct>
+                <RmtInf>
+                    <Ustrd>INVOICE PAYMENT FOR SHIPMENT ASN-990412</Ustrd>
+                </RmtInf>
+            </CdtTrfTxInf>
+        </PmtInf>
+    </CstmrCdtTrfInitn>
+</Document>

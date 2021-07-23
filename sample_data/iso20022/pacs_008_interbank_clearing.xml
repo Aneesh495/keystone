@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08">
+    <FIToFICstmrCdtTrf>
+        <GrpHdr>
+            <MsgId>FEDWIRE-PACS008-20261102-881</MsgId>
+            <CreDtTm>2026-11-02T16:35:00Z</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <SttlmInf>
+                <SttlmMtd>CLRG</SttlmMtd>
+            </SttlmInf>
+        </GrpHdr>
+        <CdtTrfTxInf>
+            <PmtId>
+                <EndToEndId>E2E-PAY-2026-99214</EndToEndId>
+                <TxId>TX-FED-9902148</TxId>
+            </PmtId>
+            <IntrBkSttlmAmt Ccy="USD">450000.00</IntrBkSttlmAmt>
+            <IntrBkSttlmDt>2026-11-03</IntrBkSttlmDt>
+            <Dbtr>
+                <Nm>ACME INDUSTRIAL CORP</Nm>
+            </Dbtr>
+            <DbtrAgt>
+                <FinInstnId>
+                    <BICFI>JPMCUS33XXX</BICFI>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtrAgt>
+                <FinInstnId>
+                    <BICFI>CITIUS33XXX</BICFI>
+                </FinInstnId>
+            </CdtrAgt>
+            <Cdtr>
+                <Nm>GLOBAL LOGISTICS CORP</Nm>
+            </Cdtr>
+        </CdtTrfTxInf>
+    </FIToFICstmrCdtTrf>
+</Document>
