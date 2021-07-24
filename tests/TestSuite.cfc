@@ -39,7 +39,8 @@ component {
                 "test": arguments.testName,
                 "message": e.message,
                 "detail": structKeyExists(e, "detail") ? e.detail : "",
-                "type": structKeyExists(e, "type") ? e.type : "TestFailure"
+                "type": structKeyExists(e, "type") ? e.type : "TestFailure",
+                "stackTrace": structKeyExists(e, "stackTrace") ? e.stackTrace : ""
             });
         }
     }

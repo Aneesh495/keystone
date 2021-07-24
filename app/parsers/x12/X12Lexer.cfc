@@ -48,7 +48,7 @@ component {
 
         // Repetition separator is at character index 83 in 5010+ or default
         var repSep = mid(trimmed, 83, 1);
-        if (repSep == " " || repSep == elemSep) {
+        if (repSep == " " || repSep == elemSep || reFind("^[A-Za-z0-9]$", repSep)) {
             repSep = "^";
         }
 

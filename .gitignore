@@ -19,6 +19,7 @@ storage/cache/
 storage/locks/
 storage/outbox/
 storage/partners/
+app/transactions/storage/
 
 # Java and bytecode
 *.class

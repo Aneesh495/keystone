@@ -16,7 +16,7 @@ component {
      */
     public array function validate(required any parseResult, any schema = nullValue()) {
         var errors = [];
-        var ast = arguments.parseResult.getAst();
+        var ast = isObject(arguments.parseResult) && structKeyExists(arguments.parseResult, "getAst") ? arguments.parseResult.getAst() : arguments.parseResult;
 
         if (!structKeyExists(ast, "segments") || !isArray(ast.segments)) {
             arrayAppend(errors, {

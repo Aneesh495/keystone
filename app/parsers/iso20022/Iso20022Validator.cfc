@@ -12,7 +12,7 @@ component {
      */
     public array function validate(required any parseResult) {
         var errors = [];
-        var ast = arguments.parseResult.getAst();
+        var ast = isObject(arguments.parseResult) && structKeyExists(arguments.parseResult, "getAst") ? arguments.parseResult.getAst() : arguments.parseResult;
 
         if (structIsEmpty(ast.groupHeader ?: {})) {
             arrayAppend(errors, {

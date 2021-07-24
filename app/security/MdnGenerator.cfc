@@ -17,16 +17,18 @@ component {
         required string originalMessageId,
         required string as2From,
         required string as2To,
-        required string payload,
+        string payload = "",
         string micAlgorithm = "sha-256",
         boolean isSuccess = true,
-        string errorMessage = ""
+        string errorMessage = "",
+        string mic = "",
+        string status = "processed"
     ) {
-        var mic = variables.micCalculator.calculateMic(arguments.payload, arguments.micAlgorithm);
+        var calculatedMic = len(trim(arguments.mic)) ? arguments.mic : (len(trim(arguments.payload)) ? variables.micCalculator.calculateMic(arguments.payload, arguments.micAlgorithm) : "");
         var boundary = "----=_Part_" & createUUID() & "_KeystoneMDN";
         var mdnMessageId = "<keystone-mdn-" & createUUID() & "@keystone.local>";
 
-        var disposition = arguments.isSuccess ?
+        var disposition = (arguments.isSuccess && arguments.status == "processed") ?
             "automatic-action/MDN-sent-automatically; processed" :
             "automatic-action/MDN-sent-automatically; failed/error: " & arguments.errorMessage;
 
@@ -43,7 +45,7 @@ component {
 
         if (arguments.isSuccess) {
             sb.append("The AS2 message with ID [").append(arguments.originalMessageId).append("] was successfully received, parsed, and verified.").append(crlf);
-            sb.append("Message Integrity Check (MIC): ").append(mic).append(crlf);
+            sb.append("Message Integrity Check (MIC): ").append(calculatedMic).append(crlf);
         } else {
             sb.append("The AS2 message with ID [").append(arguments.originalMessageId).append("] failed processing: ").append(arguments.errorMessage).append(crlf);
         }
@@ -60,7 +62,7 @@ component {
         sb.append("Original-Message-ID: ").append(arguments.originalMessageId).append(crlf);
         sb.append("Disposition: ").append(disposition).append(crlf);
         if (arguments.isSuccess) {
-            sb.append("Received-Content-MIC: ").append(mic).append(crlf);
+            sb.append("Received-Content-MIC: ").append(calculatedMic).append(crlf);
         }
         sb.append(crlf);
 

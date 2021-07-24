@@ -7,6 +7,20 @@ component {
         return this;
     }
 
+    public struct function toFhirPatient(required any hl7ResultOrAst) {
+        if (isObject(arguments.hl7ResultOrAst) && structKeyExists(arguments.hl7ResultOrAst, "findFirstSegment")) {
+            return toPatientResource(arguments.hl7ResultOrAst);
+        }
+        var pid = {};
+        if (isStruct(arguments.hl7ResultOrAst) && structKeyExists(arguments.hl7ResultOrAst, "segments")) {
+            for (var s in arguments.hl7ResultOrAst.segments) {
+                if (s.id == "PID") { pid = s; break; }
+            }
+        }
+        var fakeResult = { "findFirstSegment": function(segId) { return pid; } };
+        return toPatientResource(fakeResult);
+    }
+
     /**
      * Converts an HL7 v2 ParseResult into a FHIR R4 Patient resource.
      *

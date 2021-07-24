@@ -15,14 +15,18 @@ component {
     /**
      * Generates standard HL7 ACK message for an inbound HL7 message.
      */
-    public struct function generateAck(
+    public any function generateAck(
         required any inboundParseResult,
         string ackCode = "AA",
         string textMessage = "Message accepted successfully"
     ) {
-        var inboundAst = arguments.inboundParseResult.getAst();
+        var pResult = arguments.inboundParseResult;
+        if (isSimpleValue(pResult)) {
+            pResult = new app.parsers.hl7.HL7Parser().parse(pResult);
+        }
+        var inboundAst = pResult.getAst();
         var header = inboundAst.header ?: {};
-        var hasErrors = arguments.inboundParseResult.hasErrors();
+        var hasErrors = pResult.hasErrors();
 
         var resolvedAckCode = hasErrors ? "AE" : arguments.ackCode;
         var inboundControlId = header.controlId ?: "00000001";

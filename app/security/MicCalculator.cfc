@@ -14,6 +14,10 @@ component {
      * @payload The canonical data payload
      * @algorithm Hash algorithm (sha-256, sha-1, sha-384, sha-512)
      */
+    public string function calculate(required string payload, string algorithm = "sha-256") {
+        return calculateMic(arguments.payload, arguments.algorithm);
+    }
+
     public string function calculateMic(required string payload, string algorithm = "sha-256") {
         var jAlg = "SHA-256";
         var normAlg = lcase(trim(arguments.algorithm));

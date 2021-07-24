@@ -15,7 +15,8 @@ component {
     public struct function transform(required struct orderJson) {
         var mySender = len(trim(arguments.orderJson.receiverId ?: "")) ? arguments.orderJson.receiverId : "KEYSTONE";
         var myReceiver = len(trim(arguments.orderJson.senderId ?: "")) ? arguments.orderJson.senderId : "PARTNER";
-        var poNum = arguments.orderJson.orderNumber ?: "PO-0001";
+        var poNum = len(trim(arguments.orderJson.orderId ?: "")) ? arguments.orderJson.orderId : (arguments.orderJson.orderNumber ?: "PO-0001");
+        var ackCode = len(trim(arguments.orderJson.ackType ?: "")) ? arguments.orderJson.ackType : "AD";
         var poDate = variables.valueTransforms.toX12Date(arguments.orderJson.orderDate ?: dateFormat(now(), "yyyy-mm-dd"));
 
         var isaCtl = variables.idGenerator.nextControlNumber(9);
@@ -58,17 +59,17 @@ component {
         // BAK01 = 00 (Original), BAK02 = AD (Acknowledge with Detail), BAK03 = PO Number, BAK04 = PO Date
         arrayAppend(segments, {
             "id": "BAK",
-            "elements": ["00", "AD", poNum, poDate]
+            "elements": ["00", ackCode, poNum, poDate]
         });
 
         // Line Items
-        var items = arguments.orderJson.items ?: [];
+        var items = structKeyExists(arguments.orderJson, "lineItems") ? arguments.orderJson.lineItems : (arguments.orderJson.items ?: []);
         var lineIdx = 0;
         for (var item in items) {
             lineIdx++;
             var qty = item.quantity ?: 1;
             var price = item.unitPrice ?: 0.0;
-            var sku = item.sku ?: "";
+            var sku = len(trim(item.sku ?: "")) ? item.sku : (item.itemCode ?: "ITEM-" & lineIdx);
 
             arrayAppend(segments, {
                 "id": "PO1",

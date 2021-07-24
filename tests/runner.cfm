@@ -18,7 +18,13 @@ testSuites = [
     new tests.unit.parsers.FlatFileTest(),
     new tests.unit.transform.TransformTest(),
     new tests.unit.security.SecurityTest(),
-    new tests.unit.transactions.SagaTest()
+    new tests.unit.transactions.SagaTest(),
+    new tests.integration.SupplyChainPipelineTest(),
+    new tests.integration.HealthcarePipelineTest(),
+    new tests.integration.FinancialClearingTest(),
+    new tests.integration.As2TransmissionTest(),
+    new tests.integration.SagaRollbackTest(),
+    new tests.integration.ConcurrentThroughputTest()
 ];
 
 // Execute each suite
@@ -40,6 +46,13 @@ if (results.failed > 0) {
     writeOutput(chr(10) & "[FAILURES & ERRORS]:" & chr(10));
     for (err in results.errors) {
         writeOutput("  - [" & err.suite & "] " & err.test & ": " & err.message & chr(10));
+        if (structKeyExists(err, "stackTrace") && len(err.stackTrace)) {
+            stLines = listToArray(err.stackTrace, chr(10));
+            maxLines = min(4, arrayLen(stLines));
+            for (li = 1; li <= maxLines; li++) {
+                writeOutput("    Stack: " & stLines[li] & chr(10));
+            }
+        }
         if (len(err.detail)) {
             writeOutput("    Detail: " & err.detail & chr(10));
         }

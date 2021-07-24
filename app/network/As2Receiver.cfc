@@ -95,7 +95,7 @@ component {
 
         // Render synchronous MDN response
         var mdnGen = new app.security.MdnGenerator();
-        var mdnText = mdnGen.generateMdn(
+        var mdnRes = mdnGen.generateMdn(
             originalMessageId = messageId,
             as2From = as2To,
             as2To = as2From,
@@ -103,6 +103,7 @@ component {
             mic = mic,
             micAlgorithm = micAlg
         );
+        var mdnText = isStruct(mdnRes) ? mdnRes.body : mdnRes;
 
         if (isObject(variables.idempotencyStore)) {
             var idemKeySuccess = "AS2_" & as2From & "_" & messageId;
