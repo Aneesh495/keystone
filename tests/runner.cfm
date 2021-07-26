@@ -24,7 +24,12 @@ testSuites = [
     new tests.integration.FinancialClearingTest(),
     new tests.integration.As2TransmissionTest(),
     new tests.integration.SagaRollbackTest(),
-    new tests.integration.ConcurrentThroughputTest()
+    new tests.integration.ConcurrentThroughputTest(),
+    new tests.regressions.Bug001_X12TrailingDelimiterTest(),
+    new tests.regressions.Bug002_EdifactReleaseEscapeTest(),
+    new tests.regressions.Bug003_HL7RepetitionFieldTest(),
+    new tests.regressions.Bug004_SagaCompensationDeadlockTest(),
+    new tests.regressions.Bug005_As2MicAlgorithmMismatchTest()
 ];
 
 // Execute each suite

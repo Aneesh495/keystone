@@ -12,6 +12,7 @@ component {
     property name="eventBus" type="any";
     property name="maxAttempts" type="numeric";
     property name="baseDelayMs" type="numeric";
+    property name="maxDelayMs" type="numeric";
     property name="lockName" type="string";
 
     /**
@@ -23,7 +24,8 @@ component {
         any logger = "",
         any eventBus = "",
         numeric maxAttempts = 5,
-        numeric baseDelayMs = 1000
+        numeric baseDelayMs = 1000,
+        numeric maxDelayMs = 60000
     ) {
         variables.storageDir = arguments.storageDir;
         variables.dlq = arguments.dlq;
@@ -31,6 +33,7 @@ component {
         variables.eventBus = arguments.eventBus;
         variables.maxAttempts = arguments.maxAttempts;
         variables.baseDelayMs = arguments.baseDelayMs;
+        variables.maxDelayMs = arguments.maxDelayMs;
         variables.lockName = "keystone_outbox_lock";
 
         ensureDirectory();
@@ -194,6 +197,16 @@ component {
         }
 
         return stats;
+    }
+
+    /**
+     * Calculates exponential backoff delay with bounded jitter for an attempt number.
+     */
+    public numeric function calculateBackoffMs(numeric attempt = 1) {
+        var expBackoff = variables.baseDelayMs * (2 ^ (arguments.attempt - 1));
+        var bounded = min(expBackoff, variables.maxDelayMs);
+        var jitter = variables.baseDelayMs > 0 ? randRange(1, max(2, int(variables.baseDelayMs / 2))) : 0;
+        return bounded + jitter;
     }
 
     /**
