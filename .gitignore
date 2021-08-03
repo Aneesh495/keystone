@@ -29,6 +29,8 @@ app/transactions/storage/
 # C / Native builds
 native/build/
 native/bin/
+bin/keystone_bench
+lib/
 *.o
 *.so
 *.dylib
